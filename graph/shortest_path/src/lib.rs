@@ -2,8 +2,19 @@ use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std::ops::Add;
 
-use zero::Zero;
 use graph_base;
+use zero::Zero;
+
+#[derive(Debug, Clone)]
+pub struct SSSPResult<Weight>
+where
+    Weight: Clone + Add<Output = Weight> + Ord + Zero,
+{
+    pub size: usize,
+    pub source: usize,
+    pub prv: Vec<Option<usize>>,
+    pub dist: Vec<Option<Weight>>,
+}
 
 pub trait ShortestPath<Weight>
 where
@@ -12,22 +23,30 @@ where
 {
     fn get_weights<'a>(&'a self, e: usize) -> Vec<(usize, &'a Weight)>;
 
-    fn dijkstra(&self, s: usize) -> Vec<Option<Weight>> {
-        let mut res = vec![None; self.vertex_count()];
+    fn dijkstra(&self, s: usize) -> SSSPResult<Weight> {
+        let mut dist = vec![None; self.vertex_count()];
+        let mut prv = vec![None; self.vertex_count()];
         let mut h = BinaryHeap::new();
-        h.push((Reverse(Weight::zero()), s));
-        while let Some((d, v)) = h.pop() {
-            if !res[v].is_none() {
+        h.push((Reverse(Weight::zero()), None, s));
+        while let Some((d, p, v)) = h.pop() {
+            if !dist[v].is_none() {
                 continue;
             }
             for (to, w) in self.get_weights(v) {
-                if res[to].is_none() {
-                    h.push((Reverse(w.clone() + d.clone().0), to));
+                if dist[to].is_none() {
+                    h.push((Reverse(w.clone() + d.clone().0), Some(v), to));
                 }
             }
-            res[v] = Some(d.0);
+            dist[v] = Some(d.0);
+            prv[v] = p;
         }
-        res
+
+        SSSPResult {
+            size: self.vertex_count(),
+            source: s,
+            dist,
+            prv,
+        }
     }
 }
 
