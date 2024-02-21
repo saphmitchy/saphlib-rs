@@ -3,8 +3,25 @@
 version = 3
 
 [[package]]
+name = "binary_indexed_tree"
+version = "0.1.0"
+dependencies = [
+ "group",
+ "magma",
+ "monoid",
+]
+
+[[package]]
 name = "graph-base"
 version = "0.1.0"
+
+[[package]]
+name = "group"
+version = "0.1.0"
+dependencies = [
+ "magma",
+ "monoid",
+]
 
 [[package]]
 name = "lazy_static"
@@ -17,6 +34,17 @@ name = "lowlink"
 version = "0.1.0"
 dependencies = [
  "graph-base",
+]
+
+[[package]]
+name = "magma"
+version = "0.1.0"
+
+[[package]]
+name = "monoid"
+version = "0.1.0"
+dependencies = [
+ "magma",
 ]
 
 [[package]]
@@ -91,7 +119,11 @@ version = "0.1.0"
 name = "verify"
 version = "0.1.0"
 dependencies = [
+ "binary_indexed_tree",
  "graph-base",
+ "group",
+ "magma",
+ "monoid",
  "proconio",
  "shortest_path",
  "unionfind",
