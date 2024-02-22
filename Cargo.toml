@@ -7,3 +7,6 @@ members = [
     "ds/*/",
     "verify/"
 ]
+
+license = "MIT"
+author = "saphmitchy"
