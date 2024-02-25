@@ -14,3 +14,4 @@ binary_indexed_tree = { path = "../ds/binary_indexed_tree" }
 magma = { path = "../math/magma" }
 monoid = { path = "../math/monoid" }
 group = { path = "../math/group" }
+monotone_minima = { path = "../math/monotone_minima" }
