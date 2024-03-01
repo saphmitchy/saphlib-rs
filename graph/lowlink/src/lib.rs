@@ -1,30 +1,36 @@
-use graph_base;
+use graph_base::{self, Edge, GraphBase};
 
 #[derive(Debug)]
 pub struct Lowlink {
     ord: Vec<usize>,
     low: Vec<usize>,
     is_root: Vec<bool>,
-    is_tree: Vec<Vec<bool>>,
+    is_tree_edge: Vec<bool>,
 }
 
 impl Lowlink {
     const MAX: usize = usize::MAX;
 
-    pub fn dfs(&mut self, g: &graph_base::UnweightedGraph, x: usize, from: usize, counter: usize) -> usize {
+    pub fn dfs(
+        &mut self,
+        g: &graph_base::UnweightedGraph,
+        x: usize,
+        from: usize,
+        counter: usize,
+    ) -> usize {
         let mut counter = counter + 1;
         self.ord[x] = counter;
         self.low[x] = counter;
-        for i in g.edges[x].clone() {
-            if self.ord[i] == Self::MAX {
-                self.is_tree[x].push(true);
-                counter = self.dfs(g, i, x, counter);
-                if i != from {
-                    self.low[x] = self.low[x].min(self.low[i]);
+        for &Edge { to, id, .. } in g.get_edges(x) {
+            if self.ord[to] == Self::MAX {
+                self.is_tree_edge[id] = true;
+                counter = self.dfs(g, to, x, counter);
+                if to != from {
+                    self.low[x] = self.low[x].min(self.low[to]);
                 }
             } else {
-                self.is_tree[x].push(false);
-                self.low[x] = self.low[x].min(self.ord[i]);
+                self.is_tree_edge[id] = false;
+                self.low[x] = self.low[x].min(self.ord[to]);
             }
         }
         counter
@@ -32,13 +38,13 @@ impl Lowlink {
 
     pub fn new(g: &graph_base::UnweightedGraph) -> Lowlink {
         let mut res = Lowlink {
-            ord: vec![Self::MAX; g.n],
-            low: vec![Self::MAX; g.n],
-            is_root: vec![false; g.n],
-            is_tree: vec![vec![]; g.n],
+            ord: vec![Self::MAX; g.vertex_count()],
+            low: vec![Self::MAX; g.vertex_count()],
+            is_root: vec![false; g.vertex_count()],
+            is_tree_edge: vec![false; g.edge_count()],
         };
         let mut counter = 0;
-        for i in 0..g.n {
+        for i in 0..g.vertex_count() {
             if res.ord[i] == Self::MAX {
                 res.is_root[i] = true;
                 counter = res.dfs(g, i, Self::MAX, counter);

@@ -54,7 +54,7 @@ impl ShortestPath<usize> for graph_base::UnweightedGraph {
     fn get_weights<'a>(&'a self, e: usize) -> Vec<(usize, &'a usize)> {
         self.get_edges(e)
             .iter()
-            .map(|to| (to.clone(), &1usize))
+            .map(|x| (x.to, &1usize))
             .collect::<Vec<_>>()
     }
 }
@@ -63,7 +63,7 @@ impl<T: Clone + Add<Output = T> + Ord + Zero> ShortestPath<T> for graph_base::We
     fn get_weights<'a>(&'a self, e: usize) -> Vec<(usize, &'a T)> {
         self.get_edges(e)
             .iter()
-            .map(|x| (x.0.clone(), &x.1))
+            .map(|x| (x.to, &x.weight))
             .collect()
     }
 }
