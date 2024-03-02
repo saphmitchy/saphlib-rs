@@ -122,6 +122,7 @@ dependencies = [
  "binary_indexed_tree",
  "graph-base",
  "group",
+ "lowlink",
  "magma",
  "monoid",
  "proconio",

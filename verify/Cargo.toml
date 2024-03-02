@@ -10,6 +10,7 @@ proconio = { version = "=0.3.6", features = ["derive"] }
 unionfind = { path = "../ds/unionfind" }
 graph-base = { path = "../graph/graph-base" }
 shortest_path = { path = "../graph/shortest_path" }
+lowlink = { path = "../graph/lowlink" }
 binary_indexed_tree = { path = "../ds/binary_indexed_tree" }
 magma = { path = "../math/magma" }
 monoid = { path = "../math/monoid" }
