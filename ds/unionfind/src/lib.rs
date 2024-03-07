@@ -4,7 +4,7 @@ pub struct UnionFind {
     parrent_size: Vec<i32>,
 }
 
-impl UnionFind  {
+impl UnionFind {
     pub fn new(n: usize) -> UnionFind {
         UnionFind {
             n: n,
@@ -70,7 +70,9 @@ impl UnionFind  {
             let root = self.root(i);
             res[root].push(i);
         }
-        res.into_iter().filter(|x| !x.is_empty()).collect::<Vec<_>>()
+        res.into_iter()
+            .filter(|x| !x.is_empty())
+            .collect::<Vec<_>>()
     }
 }
 
@@ -99,6 +101,9 @@ mod tests {
         assert!(!uf.same(2, 6));
         let mut g = uf.group();
         g.sort();
-        assert_eq!(g, vec![vec![0, 3, 4, 5, 8], vec![1, 9], vec![2, 7], vec![6]]);
+        assert_eq!(
+            g,
+            vec![vec![0, 3, 4, 5, 8], vec![1, 9], vec![2, 7], vec![6]]
+        );
     }
 }

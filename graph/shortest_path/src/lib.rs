@@ -2,7 +2,7 @@ use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std::ops::Add;
 
-use graph_base;
+use graph_base::{self, GraphBase};
 use zero::Zero;
 
 #[derive(Debug, Clone)]
@@ -19,11 +19,30 @@ where
 pub trait ShortestPath<Weight>
 where
     Self: graph_base::GraphBase,
+{
+    fn get_weights(&self, e: usize) -> Vec<(usize, Weight)>;
+
+    fn dijkstra(&self, s: usize) -> SSSPResult<Weight>
+    where
+        Weight: Clone + Add<Output = Weight> + Ord + Zero,
+    {
+        self.dijkstra_inner(s)
+    }
+}
+
+trait ShortestPathInnter<Weight>
+where
     Weight: Clone + Add<Output = Weight> + Ord + Zero,
 {
-    fn get_weights<'a>(&'a self, e: usize) -> Vec<(usize, &'a Weight)>;
+    fn dijkstra_inner(&self, s: usize) -> SSSPResult<Weight>;
+}
 
-    fn dijkstra(&self, s: usize) -> SSSPResult<Weight> {
+impl<T, Weight> ShortestPathInnter<Weight> for T
+where
+    Weight: Clone + Add<Output = Weight> + Ord + Zero,
+    T: ShortestPath<Weight>,
+{
+    fn dijkstra_inner(&self, s: usize) -> SSSPResult<Weight> {
         let mut dist = vec![None; self.vertex_count()];
         let mut prv = vec![None; self.vertex_count()];
         let mut h = BinaryHeap::new();
@@ -50,20 +69,18 @@ where
     }
 }
 
-impl ShortestPath<usize> for graph_base::UnweightedGraph {
-    fn get_weights<'a>(&'a self, e: usize) -> Vec<(usize, &'a usize)> {
+impl<T: Clone> ShortestPath<T> for graph_base::DirectedGraph<T> {
+    fn get_weights(&self, e: usize) -> Vec<(usize, T)> {
         self.get_edges(e)
-            .iter()
-            .map(|to| (to.clone(), &1usize))
-            .collect::<Vec<_>>()
+            .map(|x| (x.to as usize, x.weight.clone()))
+            .collect()
     }
 }
 
-impl<T: Clone + Add<Output = T> + Ord + Zero> ShortestPath<T> for graph_base::WeightedGraph<T> {
-    fn get_weights<'a>(&'a self, e: usize) -> Vec<(usize, &'a T)> {
+impl<T: Clone> ShortestPath<T> for graph_base::UndirectedGraph<T> {
+    fn get_weights(&self, e: usize) -> Vec<(usize, T)> {
         self.get_edges(e)
-            .iter()
-            .map(|x| (x.0.clone(), &x.1))
+            .map(|x| (x.another_side(e), x.weight().clone()))
             .collect()
     }
 }

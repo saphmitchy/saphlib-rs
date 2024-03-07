@@ -80,12 +80,18 @@ mod test {
     fn test() {
         let v = vec![3, 1, 4, 1, 5, 9, 2];
         let mut bit = BinaryIndexedTree::<AddMagma<i32>>::from_vec(&v);
-        assert_eq!((0..=7).map(|i| bit.sum(i)).collect::<Vec<_>>(), vec![0, 3, 4, 8, 9, 14, 23, 25]);
+        assert_eq!(
+            (0..=7).map(|i| bit.sum(i)).collect::<Vec<_>>(),
+            vec![0, 3, 4, 8, 9, 14, 23, 25]
+        );
         bit.add(3, &1);
         bit.add(4, &9);
-        assert_eq!((0..=7).map(|i| bit.sum(i)).collect::<Vec<_>>(), vec![0, 3, 4, 8, 10, 24, 33, 35]);
+        assert_eq!(
+            (0..=7).map(|i| bit.sum(i)).collect::<Vec<_>>(),
+            vec![0, 3, 4, 8, 10, 24, 33, 35]
+        );
         assert_eq!(bit.range_sum(0..7), 35);
         assert_eq!(bit.range_sum(2..4), 6);
         assert_eq!(bit.range_sum(3..7), 27);
-    }   
+    }
 }

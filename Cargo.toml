@@ -8,5 +8,5 @@ members = [
     "verify/"
 ]
 
+[workspace.package]
 license = "MIT"
-author = "saphmitchy"

@@ -29,7 +29,6 @@ macro_rules! impl_max_min {
         impl Commutative for MaxMagma<$t> {}
         impl Commutative for MinMagma<$t> {}
     };
-
 }
 
 impl_max_min!(usize);
