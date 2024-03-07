@@ -15,3 +15,6 @@ binary_indexed_tree = { path = "../ds/binary_indexed_tree" }
 magma = { path = "../math/magma" }
 monoid = { path = "../math/monoid" }
 group = { path = "../math/group" }
+
+# 乱数
+rand = "0.8.5"

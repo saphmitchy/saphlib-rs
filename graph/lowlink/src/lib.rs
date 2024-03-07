@@ -85,13 +85,18 @@ impl<'a, T: Clone> Lowlink<'a, T> {
     pub fn biconnected_components(&self) -> Vec<Vec<usize>> {
         let mut res = vec![];
         for i in 0..self.g.vertex_count() {
+            let mut has_child = true;
             if self.is_root[i] {
-                res.push(vec![i]);
                 for e in self.g.get_edges(i) {
                     if self.is_tree_edge[e.id()] {
+                        has_child = false;
+                        res.push(vec![i]);
                         let k = res.len() - 1;
                         self.biconnected_components_inner(e.another_side(i), &mut res, k);
                     }
+                }
+                if has_child {
+                    res.push(vec![i]);
                 }
             }
         }
