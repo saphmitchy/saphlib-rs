@@ -1,7 +1,7 @@
 // verification-helper: PROBLEM https://onlinejudge.u-aizu.ac.jp/problems/GRL_3_A
 use proconio::input;
 
-use graph_base::{GraphBase, UnweightedGraph};
+use graph_base::{GraphBase, UndirectedGraph};
 use lowlink::Lowlink;
 
 fn main() {
@@ -11,9 +11,9 @@ fn main() {
         edge: [(usize, usize); e],
     }
 
-    let mut g = UnweightedGraph::initial(v);
+    let mut g = UndirectedGraph::new(v);
     for (s, t) in edge {
-        g.add_edge_undirected(s, t).0;
+        g.add_edge(s, t);
     }
     let lk = Lowlink::new(&g);
     let mut ans = (0..v)

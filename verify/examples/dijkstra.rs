@@ -1,6 +1,6 @@
 // verification-helper: PROBLEM https://judge.yosupo.jp/problem/shortest_path
 
-use graph_base::{GraphBase, WeightedGraph};
+use graph_base::{DirectedGraph, GraphBase};
 use proconio::input;
 use shortest_path::{self, ShortestPath};
 
@@ -13,10 +13,10 @@ fn main() {
         e: [(usize, usize, i64); m],
     }
 
-    let mut g = WeightedGraph::initial(n);
+    let mut g = DirectedGraph::new(n);
 
     for (a, b, c) in e {
-        g.add_edge_directed(a, b, &c);
+        g.add_weighted_edge(a, b, &c);
     }
 
     let res = g.dijkstra(s);

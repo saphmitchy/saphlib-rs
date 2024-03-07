@@ -1,4 +1,4 @@
-use graph_base::{self, Edge, GraphBase};
+use graph_base::{GraphBase, UndirectedEdge};
 
 #[derive(Debug)]
 pub struct Lowlink {
@@ -12,9 +12,9 @@ pub struct Lowlink {
 impl Lowlink {
     const MAX: usize = usize::MAX;
 
-    pub fn dfs(
+    pub fn dfs<T: Clone>(
         &mut self,
-        g: &graph_base::UnweightedGraph,
+        g: &graph_base::UndirectedGraph<T>,
         x: usize,
         from: usize,
         counter: usize,
@@ -23,14 +23,15 @@ impl Lowlink {
         self.ord[x] = counter;
         self.low[x] = counter;
         let mut arti_flg = false;
-        for &Edge { to, id, .. } in g.get_edges(x) {
+        for e in g.get_edges(x) {
+            let to = e.another_side(x);
+            let id = e.id();
             if self.ord[to] == Self::MAX {
                 self.is_tree_edge[id] = true;
                 counter = self.dfs(g, to, x, counter);
                 self.low[x] = self.low[x].min(self.low[to]);
                 arti_flg = arti_flg || (self.ord[x] <= self.low[to]);
             } else {
-                self.is_tree_edge[id] = false;
                 if to != from {
                     self.low[x] = self.low[x].min(self.ord[to]);
                 }
@@ -39,8 +40,7 @@ impl Lowlink {
         if from == Self::MAX {
             self.is_articulation[x] = g
                 .get_edges(x)
-                .iter()
-                .filter(|x| self.is_tree_edge[x.id])
+                .filter(|x| self.is_tree_edge[x.id() as usize])
                 .count()
                 >= 2;
         } else {
@@ -49,7 +49,7 @@ impl Lowlink {
         counter
     }
 
-    pub fn new(g: &graph_base::UnweightedGraph) -> Lowlink {
+    pub fn new<T: Clone>(g: &graph_base::UndirectedGraph<T>) -> Lowlink {
         let mut res = Lowlink {
             ord: vec![Self::MAX; g.vertex_count()],
             low: vec![Self::MAX; g.vertex_count()],
@@ -67,8 +67,8 @@ impl Lowlink {
         res
     }
 
-    pub fn is_bridge<T>(&self, e: &Edge<T>) -> bool {
-        let &Edge::<T> { from, to, .. } = e;
+    pub fn is_bridge<T: Clone>(&self, e: &UndirectedEdge<T>) -> bool {
+        let (from, to) = e.side();
         if self.ord[from] < self.ord[to] {
             self.ord[from] < self.low[to]
         } else {

@@ -1,147 +1,211 @@
-#[derive(Clone)]
-pub struct Edge<T> {
-    pub from: usize,
-    pub to: usize,
+#[derive(Clone, Debug)]
+pub struct DirectedGraph<T: Clone> {
+    n: u32,
+    edges: Vec<Vec<u32>>,
+    edge_info: Vec<DirectedEdge<T>>,
+}
+
+#[derive(Clone, Debug)]
+pub struct UndirectedGraph<T: Clone> {
+    n: u32,
+    edges: Vec<Vec<u32>>,
+    edge_info: Vec<UndirectedEdge<T>>,
+}
+
+#[derive(Clone, Debug)]
+pub struct DirectedEdge<T: Clone> {
+    pub from: u32,
+    pub to: u32,
+    pub id: u32,
     pub weight: T,
-    pub id: usize,
 }
 
-struct EdgeInfo {
-    from: u32,
-    idx: u32,
+impl<T: Clone> DirectedEdge<T> {
+    pub fn from(&self) -> usize {
+        self.from as usize
+    }
+
+    pub fn to(&self) -> usize {
+        self.to as usize
+    }
+
+    pub fn id(&self) -> usize {
+        self.id as usize
+    }
+
+    pub fn weight(&self) -> &T {
+        &self.weight
+    }
 }
 
-pub struct UnweightedGraph {
-    n: usize,
-    edges: Vec<Vec<Edge<()>>>,
-    edge_info: Vec<EdgeInfo>,
+#[derive(Clone, Debug)]
+pub struct UndirectedEdge<T: Clone> {
+    side: (u32, u32),
+    id: u32,
+    weight: T,
 }
 
-pub struct WeightedGraph<T: Clone> {
-    n: usize,
-    edges: Vec<Vec<Edge<T>>>,
-    edge_info: Vec<EdgeInfo>,
+impl<T: Clone> UndirectedEdge<T> {
+    pub fn side(&self) -> (usize, usize) {
+        (self.side.0 as usize, self.side.1 as usize)
+    }
+
+    pub fn another_side(&self, s: usize) -> usize {
+        let (a, b) = self.side;
+        let a = a as usize;
+        let b = b as usize;
+        assert!(a == s || b == s);
+        a ^ b ^ s
+    }
+
+    pub fn id(&self) -> usize {
+        self.id as usize
+    }
+
+    pub fn weight(&self) -> &T {
+        &self.weight
+    }
 }
 
-pub trait GraphBase {
-    fn initial(n: usize) -> Self
-    where
-        Self: Sized;
+pub trait GraphBase
+where
+    Self: Sized,
+{
+    type EdgeType;
+    fn new(n: usize) -> Self;
+
     fn vertex_count(&self) -> usize;
     fn edge_count(&self) -> usize;
+    fn get_edges(&self, v: usize) -> Edges<'_, Self>;
+    fn edge(&self, id: usize) -> &Self::EdgeType;
 }
 
-macro_rules! impl_graphbase {
-    ($t:ty,  "unweighted") => {
-        impl GraphBase for $t {
-            impl_graphbase! {@body}
-        }
-    };
-
-    ($t:ty,  "weighted") => {
-        impl<T: Clone> GraphBase for $t {
-            impl_graphbase! {@body}
-        }
-    };
-
-    (@body) => {
-        fn initial(n: usize) -> Self {
-            Self {
-                n,
-                edges: vec![vec![]; n],
-                edge_info: vec![],
-            }
-        }
-
-        #[inline]
-        fn vertex_count(&self) -> usize {
-            self.n
-        }
-
-        #[inline]
-        fn edge_count(&self) -> usize {
-            self.edge_info.len()
-        }
-    };
+pub struct Edges<'a, T>
+where
+    T: GraphBase,
+{
+    v: std::slice::Iter<'a, u32>,
+    edge_info: &'a Vec<T::EdgeType>,
 }
 
-impl_graphbase! {UnweightedGraph, "unweighted"}
-impl_graphbase! {WeightedGraph<T>, "weighted"}
+impl<'a, T> Iterator for Edges<'a, T>
+where
+    T: GraphBase,
+{
+    type Item = &'a T::EdgeType;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.v
+            .next()
+            .and_then(|i| self.edge_info.get((*i) as usize))
+    }
+}
 
-impl UnweightedGraph {
-    pub fn add_edge_directed(&mut self, from: usize, to: usize) -> usize {
-        assert!(from < self.n);
-        assert!(to < self.n);
-        let edge = Edge {
-            from,
-            to,
-            weight: (),
-            id: self.edge_count(),
-        };
-        self.edges[from].push(edge);
-        let res = self.edge_count();
-        self.edge_info.push(EdgeInfo {
+impl<T: Clone> GraphBase for DirectedGraph<T> {
+    type EdgeType = DirectedEdge<T>;
+    fn new(n: usize) -> Self
+    where
+        Self: Sized,
+    {
+        DirectedGraph {
+            n: n as u32,
+            edges: vec![vec![]; n],
+            edge_info: vec![],
+        }
+    }
+
+    fn vertex_count(&self) -> usize {
+        self.n as usize
+    }
+
+    fn edge_count(&self) -> usize {
+        self.edge_info.len()
+    }
+
+    fn get_edges(&self, v: usize) -> Edges<'_, Self> {
+        Edges {
+            v: self.edges[v].iter(),
+            edge_info: &self.edge_info,
+        }
+    }
+
+    fn edge<'a>(&'a self, id: usize) -> &'a Self::EdgeType {
+        &self.edge_info[id]
+    }
+}
+
+impl<T: Clone> GraphBase for UndirectedGraph<T> {
+    type EdgeType = UndirectedEdge<T>;
+    fn new(n: usize) -> Self
+    where
+        Self: Sized,
+    {
+        UndirectedGraph {
+            n: n as u32,
+            edges: vec![vec![]; n],
+            edge_info: vec![],
+        }
+    }
+
+    fn vertex_count(&self) -> usize {
+        self.n as usize
+    }
+
+    fn edge_count(&self) -> usize {
+        self.edge_info.len()
+    }
+
+    fn get_edges(&self, v: usize) -> Edges<'_, Self> {
+        Edges {
+            v: self.edges[v].iter(),
+            edge_info: &self.edge_info,
+        }
+    }
+
+    fn edge<'a>(&'a self, id: usize) -> &'a Self::EdgeType {
+        &self.edge_info[id]
+    }
+}
+
+impl DirectedGraph<()> {
+    pub fn add_edge(&mut self, from: usize, to: usize) -> usize {
+        self.add_weighted_edge(from, to, &())
+    }
+}
+
+impl<T: Clone> DirectedGraph<T> {
+    pub fn add_weighted_edge(&mut self, from: usize, to: usize, w: &T) -> usize {
+        let id = self.edge_count() as u32;
+        let e = DirectedEdge {
             from: from as u32,
-            idx: (self.edges[from].len() - 1) as u32,
-        });
-        res
-    }
-
-    pub fn add_edge_undirected(&mut self, from: usize, to: usize) -> (usize, usize) {
-        let res0 = self.add_edge_directed(from, to);
-        let res1 = self.add_edge_directed(to, from);
-        (res0, res1)
-    }
-
-    #[inline]
-    pub fn get_edges<'a>(&'a self, v: usize) -> &'a Vec<Edge<()>> {
-        assert!(v < self.n);
-        self.edges.get(v).unwrap()
-    }
-
-    #[inline]
-    pub fn edge<'a>(&'a self, id: usize) -> &'a Edge<()> {
-        assert!(id < self.edge_count());
-        let EdgeInfo { from, idx } = self.edge_info[id];
-        &self.edges[from as usize][idx as usize]
-    }
-}
-
-impl<T: Clone> WeightedGraph<T> {
-    pub fn add_edge_directed(&mut self, from: usize, to: usize, w: &T) -> usize {
-        assert!(from < self.n);
-        assert!(to < self.n);
-        let edge = Edge {
-            from,
-            to,
+            to: to as u32,
             weight: w.clone(),
-            id: self.edge_count(),
+            id,
         };
-        self.edges[from].push(edge);
-        let res = self.edge_count();
-        self.edge_info.push(EdgeInfo {
-            from: from as u32,
-            idx: (self.edges[from].len() - 1) as u32,
-        });
-        res
+        self.edge_info.push(e);
+        self.edges[from].push(id);
+        id as usize
     }
+}
 
-    pub fn add_edge_undirected(&mut self, from: usize, to: usize, w: &T) -> (usize, usize) {
-        let res0 = self.add_edge_directed(from, to, w);
-        let res1 = self.add_edge_directed(to, from, w);
-        (res0, res1)
+impl UndirectedGraph<()> {
+    pub fn add_edge(&mut self, from: usize, to: usize) -> usize {
+        self.add_weighted_edge(from, to, &())
     }
+}
 
-    #[inline]
-    pub fn get_edges<'a>(&'a self, v: usize) -> &'a Vec<Edge<T>> {
-        assert!(v < self.n);
-        self.edges.get(v).unwrap()
-    }
-
-    #[inline]
-    pub fn edge<'a>(&'a self, id: usize) -> &'a Edge<T> {
-        assert!(id < self.edge_count());
-        let EdgeInfo { from, idx } = self.edge_info[id];
-        &self.edges[from as usize][idx as usize]
+impl<T: Clone> UndirectedGraph<T> {
+    pub fn add_weighted_edge(&mut self, from: usize, to: usize, w: &T) -> usize {
+        let id = self.edge_count() as u32;
+        let from = from as u32;
+        let to = to as u32;
+        let e = UndirectedEdge {
+            side: (from, to),
+            weight: w.clone(),
+            id,
+        };
+        self.edge_info.push(e);
+        self.edges[from as usize].push(id);
+        self.edges[to as usize].push(id);
+        id as usize
     }
 }
