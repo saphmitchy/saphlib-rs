@@ -1,5 +1,7 @@
 // verification-helper: PROBLEM https://judge.yosupo.jp/problem/biconnected_components
 
+use std::collections::HashSet;
+
 use graph_base::{GraphBase, UndirectedGraph};
 use lowlink::Lowlink;
 use proconio::input;
@@ -10,15 +12,23 @@ fn run(n: usize, v: &Vec<(usize, usize)>) -> bool {
         g.add_edge(*a, *b);
     }
     let lk = Lowlink::new(&g);
-    let c = lk.biconnected_components();
+    let (c, d) = lk.biconnected_components();
+    // println!("{:?}, {:?}", c, d);
     println!("{}", c.len());
-    for i in &c {
+    for (i, k) in c.iter().zip(&d) {
         print!("{}", i.len());
         for j in i {
             print!(" {}", j);
         }
+        let p = i.iter().collect::<HashSet<_>>();
+        for j in k {
+            let (s, t) = g.edge(*j).side();
+            assert!(p.contains(&s));
+            assert!(p.contains(&t));
+        }
         println!();
     }
+    assert!(d.iter().map(|p| p.iter()).flatten().collect::<HashSet<_>>().len() == v.len());
     c.len() != n - 1
 }
 
