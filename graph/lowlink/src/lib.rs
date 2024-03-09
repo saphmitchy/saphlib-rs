@@ -82,44 +82,53 @@ impl<'a, T: Clone> Lowlink<'a, T> {
         self.is_articulation[v]
     }
 
-    pub fn biconnected_components(&self) -> Vec<Vec<usize>> {
-        let mut res = vec![];
+    /// return (vertex, edge)
+    pub fn biconnected_components(&self) -> (Vec<Vec<usize>>, Vec<Vec<usize>>) {
+        let mut res0 = vec![];
+        let mut res1 = vec![];
         for i in 0..self.g.vertex_count() {
             let mut has_child = true;
             if self.is_root[i] {
                 for e in self.g.get_edges(i) {
                     if self.is_tree_edge[e.id()] {
                         has_child = false;
-                        res.push(vec![i]);
-                        let k = res.len() - 1;
-                        self.biconnected_components_inner(e.another_side(i), &mut res, k);
+                        res0.push(vec![i]);
+                        res1.push(vec![e.id()]);
+                        let k = res0.len() - 1;
+                        self.biconnected_components_inner(e.another_side(i), &mut res0, &mut res1, k);
                     }
                 }
                 if has_child {
-                    res.push(vec![i]);
+                    res0.push(vec![i]);
+                    res1.push(vec![]);
                 }
             }
         }
-        res
+        (res0, res1)
     }
 
     fn biconnected_components_inner(
         &self,
         now: usize,
-        res: &mut Vec<Vec<usize>>,
+        res0: &mut Vec<Vec<usize>>,
+        res1: &mut Vec<Vec<usize>>,
         idx: usize,
     ) -> () {
-        res[idx].push(now);
+        res0[idx].push(now);
         for e in self.g.get_edges(now) {
             let to = e.another_side(now);
             let id = e.id();
             if self.is_tree_edge[id] {
                 if self.ord[now] <= self.low[to] {
-                    res.push(vec![now]);
-                    self.biconnected_components_inner(to, res, res.len() - 1);
+                    res0.push(vec![now]);
+                    res1.push(vec![id]);
+                    self.biconnected_components_inner(to, res0, res1, res0.len() - 1);
                 } else if self.ord[now] < self.ord[to] {
-                    self.biconnected_components_inner(to, res, idx);
+                    res1[idx].push(id);
+                    self.biconnected_components_inner(to, res0, res1, idx);
                 }
+            } else if self.ord[now] > self.ord[to] {
+                res1[idx].push(id);
             }
         }
     }
