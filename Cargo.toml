@@ -5,8 +5,8 @@ members = [
     "graph/*/",
     "math/*/",
     "ds/*/",
-    "verify/"
-]
+    "verify/",
+    "misc"]
 
 [workspace.package]
 license = "MIT"
