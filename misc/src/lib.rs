@@ -46,7 +46,21 @@ macro_rules! out_with_nl {
 }
 
 pub trait Joinable {
+    /// stringify items with separation of a space.
+    /// ```
+    /// use misc::Joinable;
+    ///
+    /// let mut a = vec![3, 1, 4];
+    /// assert_eq!(a.iter().join_sep(), "3 1 4");
+    /// ```
     fn join_sep(&mut self) -> String;
+    /// output items with separation of a space to stdout.
+    /// ```
+    /// use misc::Joinable;
+    ///
+    /// let mut a = vec![3, 1, 4];
+    /// a.iter().output();
+    /// ```
     fn output(&mut self) -> ();
 }
 
@@ -55,13 +69,6 @@ where
     T: Iterator,
     T::Item: Display,
 {
-    /// stringify items with separation of a space.
-    /// ```
-    /// use misc::Joinable;
-    ///
-    /// let mut a = vec![3, 1, 4];
-    /// assert_eq!(a.iter().join_sep(), "3 1 4");
-    /// ```
     fn join_sep(&mut self) -> String {
         match self.next() {
             None => String::new(),
@@ -76,13 +83,6 @@ where
         }
     }
 
-    /// output items with separation of a space to stdout.
-    /// ```
-    /// use misc::Joinable;
-    ///
-    /// let mut a = vec![3, 1, 4];
-    /// a.iter().output();
-    /// ```
     fn output(&mut self) -> () {
         println!("{}", self.join_sep());
     }
