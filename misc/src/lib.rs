@@ -87,3 +87,16 @@ where
         println!("{}", self.join_sep());
     }
 }
+
+/// wrapper of dbg! macro.
+/// enabled when compiling without optimizations. 
+#[macro_export]
+macro_rules! db {
+    ($ ( $args:expr ), *) => {
+        if cfg!(debug_assertions) {
+            $(
+                dbg!($args);
+            )*
+        }
+    };
+}
