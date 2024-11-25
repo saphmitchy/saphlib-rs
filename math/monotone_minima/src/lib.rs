@@ -1,5 +1,7 @@
 use std::{
-    cmp::Ordering, fmt::Debug, ops::{Add, Range}
+    cmp::Ordering,
+    fmt::Debug,
+    ops::{Add, Range},
 };
 
 fn monotone_minima_inner<T, F>(h: Range<usize>, w: Range<usize>, ans: &mut Vec<T>, f: &F) -> ()

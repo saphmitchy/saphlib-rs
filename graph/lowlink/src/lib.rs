@@ -95,7 +95,12 @@ impl<'a, T: Clone> Lowlink<'a, T> {
                         res0.push(vec![i]);
                         res1.push(vec![e.id()]);
                         let k = res0.len() - 1;
-                        self.biconnected_components_inner(e.another_side(i), &mut res0, &mut res1, k);
+                        self.biconnected_components_inner(
+                            e.another_side(i),
+                            &mut res0,
+                            &mut res1,
+                            k,
+                        );
                     }
                 }
                 if has_child {

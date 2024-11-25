@@ -28,7 +28,14 @@ fn run(n: usize, v: &Vec<(usize, usize)>) -> bool {
         }
         println!();
     }
-    assert!(d.iter().map(|p| p.iter()).flatten().collect::<HashSet<_>>().len() == v.len());
+    assert!(
+        d.iter()
+            .map(|p| p.iter())
+            .flatten()
+            .collect::<HashSet<_>>()
+            .len()
+            == v.len()
+    );
     c.len() != n - 1
 }
 

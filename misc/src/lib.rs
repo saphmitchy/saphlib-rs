@@ -89,7 +89,7 @@ where
 }
 
 /// wrapper of dbg! macro.
-/// enabled when compiling without optimizations. 
+/// enabled when compiling without optimizations.
 #[macro_export]
 macro_rules! db {
     ($ ( $args:expr ), *) => {
