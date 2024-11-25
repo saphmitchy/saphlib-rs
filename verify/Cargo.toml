@@ -16,6 +16,7 @@ magma = { path = "../math/magma" }
 monoid = { path = "../math/monoid" }
 group = { path = "../math/group" }
 monotone_minima = { path = "../math/monotone_minima" }
+cht = { path = "../ds/cht" }
 
 # 乱数
 rand = "0.8.5"
