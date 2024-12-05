@@ -1,4 +1,4 @@
-use std::ops::Range;
+use std::ops::{Bound, RangeBounds};
 
 use magma;
 use monoid;
@@ -63,15 +63,30 @@ where
     T: group::Group + magma::Commutative,
     <T as magma::Magma>::S: Clone,
 {
-    pub fn range_sum(&self, range: Range<usize>) -> <T as magma::Magma>::S {
-        assert!(range.start < self.size);
-        assert!(range.end <= self.size);
-        T::binary_operation(self.sum(range.end), T::inverse(self.sum(range.start)))
+    pub fn range_sum<R>(&self, range: R) -> <T as magma::Magma>::S
+    where
+        R: RangeBounds<usize>,
+    {
+        let upper = match range.end_bound() {
+            Bound::Included(x) => *x + 1,
+            Bound::Excluded(x) => *x,
+            Bound::Unbounded => self.size,
+        };
+        let lower = match range.start_bound() {
+            Bound::Included(x) => *x,
+            Bound::Excluded(x) => *x + 1,
+            Bound::Unbounded => 0,
+        };
+        assert!(upper <= self.size);
+        assert!(lower < self.size);
+        T::binary_operation(self.sum(upper), T::inverse(self.sum(lower)))
     }
 }
 
 #[cfg(test)]
 mod test {
+    use std::ops::Bound;
+
     use magma::AddMagma;
 
     use crate::BinaryIndexedTree;
@@ -91,7 +106,9 @@ mod test {
             vec![0, 3, 4, 8, 10, 24, 33, 35]
         );
         assert_eq!(bit.range_sum(0..7), 35);
-        assert_eq!(bit.range_sum(2..4), 6);
-        assert_eq!(bit.range_sum(3..7), 27);
+        assert_eq!(bit.range_sum(..), 35);
+        assert_eq!(bit.range_sum(2..=3), 6);
+        assert_eq!(bit.range_sum(3..), 27);
+        assert_eq!(bit.range_sum((Bound::Excluded(3), Bound::Excluded(5))), 14);
     }
 }
