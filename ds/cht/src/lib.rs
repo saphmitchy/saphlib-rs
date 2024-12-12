@@ -46,10 +46,10 @@ impl CalcMarker for CalcMin {
 /// cht.add_line_right(5, 8);
 /// cht.add_line_right(2, -1);
 /// cht.add_line_right(-1, 4);
-///
-/// assert_eq!(cht.get(0), -5);
-/// assert_eq!(cht.get(4), 0);
-/// assert_eq!(cht.get(1), 1);
+/// 
+/// assert_eq!(cht.get(0), Some(-5));
+/// assert_eq!(cht.get(4), Some(0));
+/// assert_eq!(cht.get(1), Some(1));
 /// ```
 #[derive(Debug, Clone)]
 pub struct Cht<C: CalcMarker> {
